@@ -1,5 +1,5 @@
-from flask import Flask
-from flask import request
+from flask import Flask, request
+import uuid
 
 app = Flask(__name__)
 
@@ -32,6 +32,17 @@ def get_jock1():
 def get_jock2():
     return {"jock_2": db[1]["value"], "url": db[1]["url"]}, 200
 
-# @app.post("/postjock")
-# def post_jock():
-#     return {"jock": request.get_json()["value"], "url": request.get_json()["url"]}, 200
+@app.post("/postjock")
+def post_jock():
+    data = request.get_json()
+    new_jock = {
+            "jock": data["jock"],
+            "url": data["url"],
+            "id": str(uuid.uuid4().hex),
+        }
+    db.append(new_jock)
+    return {"message": "jock_created"}, 201
+
+@app.get("/jocks")
+def get_jocks():
+    return {"jocks": db}, 200
