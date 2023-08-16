@@ -1,0 +1,18 @@
+CREATE REQ.TXT
+
+pip freeze > requirements.txt
+
+RUN APP
+
+flask --app app.py run
+flask run
+
+CREATE DOCKER IMAGE
+
+docker build -t <image_name:flask_practice> .
+
+RUN IMAGE
+
+docker run -dp 5000 <image_name:flask_practice>
+docker run -dp 5000 -w /app -v "$(pwd):/app" <image_name:flask_practice>
+
