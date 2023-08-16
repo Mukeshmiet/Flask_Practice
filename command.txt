@@ -16,3 +16,11 @@ RUN IMAGE
 docker run -dp 5000 <image_name:flask_practice>
 docker run -dp 5000 -w /app -v "$(pwd):/app" <image_name:flask_practice>
 
+*Blueprint divides api in multiple segments
+
+
+
+
+
+
+
