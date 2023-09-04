@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+</head>
+<body>
+    <h1>Camera Capture</h1>
+
+    <!-- Display the camera feed -->
+    <video id="camera-feed" width="640" height="480" style="margin-bottom: 10px;" autoplay></video>
+
+    <!-- Capture button -->
+    <button id="captureButton">Capture Image</button>
+
+    <!-- Hidden form to submit the captured image as base64 data URL -->
+    <form id="captureForm" action="/capture" method="POST">
+        <input type="hidden" name="image" id="file-input">
+        <input type="submit" style="display: none;">
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const captureButton = document.getElementById("captureButton");
+            const capturedImageInput = document.getElementById("file-input");
+            const captureForm = document.getElementById("captureForm");
+        
+            // Access the user's camera
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    // Create a video element to display the camera feed
+                    const video = document.getElementById("camera-feed");
+                    video.srcObject = stream;
+        
+                    // Function to capture the image
+                    const captureImage = () => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const context = canvas.getContext("2d");
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+                        // Convert the captured image to a base64 data URL
+                        const imageDataUrl = canvas.toDataURL("image/png");
+        
+                        // Set the base64 data URL in the hidden input field
+                        capturedImageInput.value = imageDataUrl;
+        
+                        // Submit the form to save the image on the server
+                        captureForm.submit();
+                    };
+        
+                    // Add click event listener to the capture button
+                    captureButton.addEventListener("click", captureImage);
+                })
+                .catch((error) => {
+                    console.error("Error accessing the camera:", error);
+                });
+        });
+        
+    </script>
+</body>
+</html>

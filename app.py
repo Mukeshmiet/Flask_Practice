@@ -1,21 +1,45 @@
-from flask import Flask
-from flask_smorest import Api
-
-from resources.item import blp as ItemBlueprint
-from resources.store import blp as StoreBlueprint
-
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+import os
+import datetime
+import base64
+from PIL import Image
+from io import BytesIO
 
 app = Flask(__name__)
 
-app.config["PROPAGATE_EXCEPTIONS"] = True
-app.config["API_TITLE"] = "Stores FLASK API"
-app.config["API_VERSION"] = "v0.1"
-app.config["OPENAPI_VERSION"] = "3.0.3"
-app.config["OPENAPI_URL_PREFIX"] = "/"
-app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
-app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+# Set the upload folder path
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
-api = Api(app)
+# Ensure the upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-api.register_blueprint(ItemBlueprint)
-api.register_blueprint(StoreBlueprint)
+@app.route('/')
+def index():
+    return render_template('camera.html')
+
+@app.route('/capture', methods=['POST'])
+def capture():
+    image_data_url = request.form.get('image')
+    if image_data_url:
+        # Decode the base64 data URL to obtain the image data
+        image_data = base64.b64decode(image_data_url.split(',')[1])
+
+        # Create an image from the decoded data
+        img = Image.open(BytesIO(image_data))
+
+        # Generate a filename with the current date and time
+        timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        filename = f"img_{timestamp}.png"  # Change file extension to 'png'
+
+        # Save the image in PNG format
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        img.save(file_path, 'PNG')
+
+        return redirect(url_for('index'))
+
+@app.route('/uploaded_images/<filename>')
+def view_image(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+if __name__ == '__main__':
+    app.run(debug=True)

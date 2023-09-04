@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Feed and Capture</title>
+</head>
+<body>
+    <h1>Camera Feed and Capture</h1>
+    <video id="camera-feed" autoplay></video>
+    <button id="capture-button">Capture Image</button>
+    <img id="captured-image" style="display: none;">
+    <canvas id="image-canvas" style="display: none;"></canvas>
+    
+    <script>
+        const cameraFeed = document.getElementById('camera-feed');
+        const captureButton = document.getElementById('capture-button');
+        const capturedImage = document.getElementById('captured-image');
+        const imageCanvas = document.getElementById('image-canvas');
+        const canvasContext = imageCanvas.getContext('2d');
+
+        captureButton.addEventListener('click', () => {
+            // Capture the current frame from the video feed
+            imageCanvas.width = cameraFeed.videoWidth;
+            imageCanvas.height = cameraFeed.videoHeight;
+            canvasContext.drawImage(cameraFeed, 0, 0, imageCanvas.width, imageCanvas.height);
+            
+            // Display the captured image
+            capturedImage.src = imageCanvas.toDataURL('image/jpeg');
+            capturedImage.style.display = 'block';
+            imageCanvas.style.display = 'none';
+        });
+
+        // Access the device camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                cameraFeed.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error('Error accessing camera:', error);
+            });
+    </script>
+</body>
+</html>
